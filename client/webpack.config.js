@@ -7,33 +7,41 @@ const htmlWebpackPlugin = require('html-webpack-plugin');
 
 let plugins = [];
 
-plugins.push(new htmlWebpackPlugin({
-  hash: true,
-  minify: {
-    html5: true,
-    collapseWhitespace: true,
-    removeComments: true,
-  },
-  filename: 'index.html',
-  template: __dirname + '/main.html'
-}));
+plugins.push(
+  new htmlWebpackPlugin({
+    hash: true,
+    minify: {
+      html5: true,
+      collapseWhitespace: true,
+      removeComments: true,
+    },
+    filename: 'index.html',
+    template: __dirname + '/main.html',
+  })
+);
 
 plugins.push(new extractTextPlugin('styles.css'));
 
 plugins.push(
   new webpack.ProvidePlugin({
-    '$': 'jquery/dist/jquery.js',
-    'jQuery': 'jquery/dist/jquery.js',
+    $: 'jquery/dist/jquery.js',
+    jQuery: 'jquery/dist/jquery.js',
   })
 );
 
-plugins.push(new webpack.optimize.CommonsChunkPlugin({
-  name: 'vendor',
-  filename: 'vendor.bundle.js'
-}));
+plugins.push(
+  new webpack.optimize.CommonsChunkPlugin({
+    name: 'vendor',
+    filename: 'vendor.bundle.js',
+  })
+);
+
+let SERVICE_URL = JSON.stringify('http://localhost:3000');
 
 if (process.env.NODE_ENV === 'production') {
-  plugins.push(new webpack.optimize.ModuleConcatenationPlugin())
+  SERVICE_URL = JSON.stringify('http://api.prod:3000/');
+
+  plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
   plugins.push(new babiliPlugin());
 
   plugins.push(
@@ -49,10 +57,16 @@ if (process.env.NODE_ENV === 'production') {
   );
 }
 
+plugins.push(
+  new webpack.DefinePlugin({
+    SERVICE_URL,
+  })
+);
+
 module.exports = {
   entry: {
     app: './app-src/app.js',
-    vendor: ['jquery', 'bootstrap', 'reflect-metadata']
+    vendor: ['jquery', 'bootstrap', 'reflect-metadata'],
   },
   output: {
     filename: 'bundle.js',
